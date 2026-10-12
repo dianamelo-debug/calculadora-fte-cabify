@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de FTEs Cabify - Ultra Purple Edition</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cabify: {
+                            base: '#140727',
+                            darkCard: '#1F0A3B',
+                            card: '#2A104E',
+                            cardHover: '#351463',
+                            purple: '#7152D8',
+                            neon: '#913BFF',
+                            bright: '#A855F7',
+                            pink: '#EC4899',
+                            border: '#4C1D95',
+                            borderBright: '#8B5CF6',
+                            textLight: '#F3E8FF',
+                            subtext: '#C084FC'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Montserrat & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #140727;
+            color: #F3E8FF;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(145, 59, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(113, 82, 216, 0.15) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        h1, h2, h3, h4, .brand-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .purple-card {
+            background-color: #2A104E;
+            border: 1px solid #4C1D95;
+            box-shadow: 0 8px 25px -5px rgba(145, 59, 255, 0.2);
+            transition: all 0.25s ease-in-out;
+        }
+
+        .purple-card:hover {
+            border-color: #8B5CF6;
+            box-shadow: 0 12px 30px -5px rgba(145, 59, 255, 0.35);
+        }
+
+        .input-purple {
+            background-color: #1F0A3B;
+            border: 1.5px solid #6D28D9;
+            color: #FFFFFF;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .input-purple:focus {
+            border-color: #A855F7;
+            background-color: #2A104E;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3);
+        }
+
+        select.input-purple option {
+            background-color: #1F0A3B;
+            color: #F3E8FF;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #140727;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4C1D95;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #913BFF;
+        }
+
+        /* Print Specific Styling */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: #FFFFFF !important;
+                color: #000000 !important;
+            }
+            .purple-card {
+                background: #FFFFFF !important;
+                border: 1px solid #000000 !important;
+                color: #000000 !important;
+                box-shadow: none !important;
+            }
+            .input-purple {
+                background: #FFFFFF !important;
+                color: #000000 !important;
+                border: 1px solid #000000 !important;
+            }
+            .print-header {
+                display: block !important;
+                border-bottom: 2px solid #000;
+                padding-bottom: 12px;
+                margin-bottom: 20px;
+            }
+            .text-cabify-subtext, .text-slate-400, .text-cabify-bright {
+                color: #333333 !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16">
+
+    <!-- HEADER -->
+    <header class="bg-cabify-darkCard/90 border-b border-cabify-border sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-11 h-11 bg-gradient-to-br from-cabify-neon to-cabify-purple rounded-2xl flex items-center justify-center text-white shadow-lg shadow-cabify-neon/40 font-black text-2xl brand-font border border-white/20">
+                    C
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-white font-black text-2xl tracking-tight brand-font">Cabify</span>
+                        <span class="text-xs bg-cabify-neon/30 text-cabify-textLight px-2.5 py-0.5 rounded-full font-bold border border-cabify-neon/50">OPERATIONS</span>
+                    </div>
+                    <p class="text-xs text-cabify-subtext">Calculadora de Headcount & FTEs Omnicanal</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-3 no-print">
+                <button onclick="resetDefaults()" class="px-3.5 py-2 text-xs font-bold text-cabify-textLight hover:text-white bg-cabify-card hover:bg-cabify-cardHover rounded-xl transition-all border border-cabify-border flex items-center">
+                    <i class="fa-solid fa-rotate-left mr-2 text-cabify-bright"></i> Restablecer
+                </button>
+                <button onclick="exportCSV()" class="px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-purple-800 to-indigo-900 hover:opacity-90 rounded-xl transition-all border border-cabify-border flex items-center shadow-lg">
+                    <i class="fa-solid fa-file-csv mr-2 text-emerald-400"></i> Exportar CSV
+                </button>
+                <button onclick="window.print()" class="px-4 py-2 text-xs font-extrabold text-white bg-gradient-to-r from-cabify-purple to-cabify-neon hover:from-cabify-neon hover:to-cabify-purple rounded-xl transition-all shadow-lg shadow-cabify-neon/30 flex items-center border border-white/20">
+                    <i class="fa-solid fa-print mr-2"></i> Imprimir / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+
+        <!-- PRINT HEADER BANNER (Hidden on screen, visible on PDF/Print) -->
+        <div class="hidden print-header">
+            <h1 class="text-2xl font-bold">Cabify Operations - Reporte de Capacidad FTE</h1>
+            <p id="printServiceTaxonomy" class="text-sm font-semibold mt-1">Servicio: Core | B2B | Attention | AR-UY-PE</p>
+            <p id="printDate" class="text-xs text-slate-500 mt-0.5"></p>
+        </div>
+
+        <!-- 1. CASCADING SERVICE SELECTORS (FROM IMAGE TAXONOMY) -->
+        <section class="purple-card rounded-2xl p-6 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4 border-b border-cabify-border pb-3">
+                <h2 class="text-base font-extrabold text-white flex items-center brand-font">
+                    <i class="fa-solid fa-sitemap text-cabify-neon mr-2.5"></i> Jerarquía de Servicio Cabify
+                </h2>
+                <span class="text-xs font-bold text-cabify-textLight bg-cabify-neon/20 px-3 py-1 rounded-full border border-cabify-neon/40">Taxonomía Operativa</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Level 1: Services -->
+                <div>
+                    <label class="block text-xs font-bold text-cabify-subtext mb-1">1. Services</label>
+                    <select id="selServices" onchange="onServicesChange()" class="input-purple w-full px-3 py-2.5 rounded-xl text-sm font-bold">
+                        <!-- Options generated by JS -->
+                    </select>
+                </div>
+
+                <!-- Level 2: Audience Support Service -->
+                <div>
+                    <label class="block text-xs font-bold text-cabify-subtext mb-1">2. Audience Support Service</label>
+                    <select id="selAudience" onchange="onAudienceChange()" class="input-purple w-full px-3 py-2.5 rounded-xl text-sm font-bold">
+                        <!-- Options generated by JS -->
+                    </select>
+                </div>
+
+                <!-- Level 3: Group Support Service -->
+                <div>
+                    <label class="block text-xs font-bold text-cabify-subtext mb-1">3. Group Support Service</label>
+                    <select id="selGroup" onchange="onGroupChange()" class="input-purple w-full px-3 py-2.5 rounded-xl text-sm font-bold">
+                        <!-- Options generated by JS -->
+                    </select>
+                </div>
+
+                <!-- Level 4: Market Support Service -->
+                <div>
+                    <label class="block text-xs font-bold text-cabify-subtext mb-1">4. Market Support Service</label>
+                    <select id="selMarket" onchange="updateSelectedTaxonomyLabel()" class="input-purple w-full px-3 py-2.5 rounded-xl text-sm font-bold">
+                        <!-- Options generated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Active Selected Service Summary Bar -->
+            <div class="mt-4 p-3 bg-cabify-darkCard/80 rounded-xl border border-cabify-border flex items-center justify-between">
+                <span class="text-xs text-cabify-subtext font-semibold"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Servicio Activo Seleccionado:</span>
+                <span id="activeServiceTag" class="text-xs font-black text-cabify-bright bg-cabify-neon/20 px-3 py-1 rounded-lg border border-cabify-neon/50">Core | B2B | Attention | AR-UY-PE</span>
+            </div>
+        </section>
+
+        <!-- 2. GLOBAL WORKDAY PARAMETERS -->
+        <section class="purple-card rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4 border-b border-cabify-border pb-3">
+                <h2 class="text-base font-extrabold text-white flex items-center brand-font">
+                    <i class="fa-solid fa-clock text-cabify-bright mr-2.5"></i> Parámetros de Jornada Laboral
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-cabify-subtext mb-1">Horas por Turno (Diario)</label>
+                    <div class="relative">
+                        <input type="number" id="hoursPerDay" value="8" min="1" max="24" step="0.5" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm pl-9 font-bold">
+                        <i class="fa-regular fa-clock absolute left-3 top-2.5 text-cabify-bright text-sm"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-cabify-subtext mb-1">Días Laborales por Semana</label>
+                    <div class="relative">
+                        <input type="number" id="daysPerWeek" value="5" min="1" max="7" step="1" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm pl-9 font-bold">
+                        <i class="fa-regular fa-calendar-days absolute left-3 top-2.5 text-cabify-bright text-sm"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-cabify-subtext mb-1">Días Hábiles al Mes</label>
+                    <div class="relative">
+                        <input type="number" id="workingDaysMonth" value="21.67" min="1" max="31" step="0.1" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm pl-9 font-bold">
+                        <i class="fa-solid fa-calendar-check absolute left-3 top-2.5 text-cabify-bright text-sm"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-cabify-subtext mb-1">Base Horas Mensuales / FTE</label>
+                    <div class="relative">
+                        <input type="number" id="monthlyStandardHours" value="173.3" readonly class="input-purple w-full px-3 py-2 rounded-xl text-sm pl-9 bg-cabify-darkCard text-cabify-bright font-black cursor-not-allowed border-cabify-neon/40">
+                        <i class="fa-solid fa-user-clock absolute left-3 top-2.5 text-cabify-neon text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. CHANNELS INPUT CARDS (CALLS, CHAT, TICKETS) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- CANAL 1: CALLS -->
+            <div class="purple-card rounded-2xl p-6 flex flex-col justify-between border-t-4 border-t-cabify-neon">
+                <div>
+                    <div class="flex items-center space-x-3 mb-5">
+                        <div class="p-3 bg-cabify-neon/20 text-cabify-bright rounded-xl border border-cabify-neon/40">
+                            <i class="fa-solid fa-phone text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-xl text-white brand-font">Calls</h3>
+                            <p class="text-xs text-cabify-subtext">Atención Telefónica Síncrona</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-cabify-subtext mb-1">Volumen Mensual de Llamadas</label>
+                            <input type="number" id="callsVolume" value="18000" min="0" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-bold text-cabify-subtext">AHT / TMO (Segundos)</label>
+                                <span id="callsAhtMin" class="text-[11px] text-cabify-bright font-mono font-bold">4.0 min</span>
+                            </div>
+                            <input type="number" id="callsAht" value="240" min="1" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-cabify-subtext mb-1">Ocupación / Eficiencia (%)</label>
+                            <input type="number" id="callsOccupancy" value="85" min="10" max="100" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-cabify-subtext mb-1">Shrinkage / Merma (%)</label>
+                            <input type="number" id="callsShrinkage" value="22" min="0" max="80" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calls Result -->
+                <div class="mt-6 pt-4 border-t border-cabify-border bg-cabify-darkCard/90 -mx-6 -mb-6 p-6 rounded-b-2xl">
+                    <div class="flex justify-between items-baseline mb-1">
+                        <span class="text-xs font-bold text-cabify-subtext">FTEs Requeridos Calls:</span>
+                        <span id="callsFteResult" class="text-3xl font-black text-cabify-bright brand-font">0.0</span>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-cabify-subtext font-medium">
+                        <span>Horas Netas: <strong id="callsNetHours" class="text-white">0 hrs</strong></span>
+                        <span>Con Shrinkage: <strong id="callsGrossHours" class="text-white">0 hrs</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANAL 2: CHAT (WITH CONCURRENCY) -->
+            <div class="purple-card rounded-2xl p-6 flex flex-col justify-between border-t-4 border-t-cabify-pink">
+                <div>
+                    <div class="flex items-center space-x-3 mb-5">
+                        <div class="p-3 bg-cabify-pink/20 text-cabify-pink rounded-xl border border-cabify-pink/40">
+                            <i class="fa-solid fa-comments text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-xl text-white brand-font">Chat</h3>
+                            <p class="text-xs text-cabify-subtext">Mensajería en Vivo / App</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-cabify-subtext mb-1">Volumen Mensual de Chats</label>
+                            <input type="number" id="chatVolume" value="32000" min="0" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-bold text-cabify-subtext">AHT Chat (Segundos)</label>
+                                <span id="chatAhtMin" class="text-[11px] text-cabify-pink font-mono font-bold">5.5 min</span>
+                            </div>
+                            <input type="number" id="chatAht" value="330" min="1" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+
+                        <!-- EDITABLE CONCURRENCY CONTROL -->
+                        <div class="p-3 bg-cabify-darkCard border border-cabify-pink/40 rounded-xl space-y-1">
+                            <div class="flex justify-between items-center">
+                                <label class="text-xs font-bold text-cabify-pink flex items-center">
+                                    <i class="fa-solid fa-layer-group mr-1.5"></i> Concurrencia de Chats
+                                </label>
+                                <span class="text-[10px] bg-cabify-pink/20 text-cabify-pink px-2 py-0.5 rounded font-mono font-bold">Simultáneos</span>
+                            </div>
+                            <input type="number" id="chatConcurrency" value="2.5" min="1" step="0.1" max="10" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-lg text-sm font-black text-white border-cabify-pink">
+                            <p class="text-[10px] text-cabify-subtext">Chats activos atendidos al mismo tiempo por agente.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-cabify-subtext mb-1">Shrinkage / Merma (%)</label>
+                            <input type="number" id="chatShrinkage" value="22" min="0" max="80" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Result -->
+                <div class="mt-6 pt-4 border-t border-cabify-border bg-cabify-darkCard/90 -mx-6 -mb-6 p-6 rounded-b-2xl">
+                    <div class="flex justify-between items-baseline mb-1">
+                        <span class="text-xs font-bold text-cabify-subtext">FTEs Requeridos Chat:</span>
+                        <span id="chatFteResult" class="text-3xl font-black text-cabify-pink brand-font">0.0</span>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-cabify-subtext font-medium">
+                        <span>Ajustado por Concurrencia: <strong id="chatEffectiveHours" class="text-white">0 hrs</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANAL 3: TICKETS (WITH SLA TARGET) -->
+            <div class="purple-card rounded-2xl p-6 flex flex-col justify-between border-t-4 border-t-purple-400">
+                <div>
+                    <div class="flex items-center space-x-3 mb-5">
+                        <div class="p-3 bg-purple-500/20 text-purple-300 rounded-xl border border-purple-400/40">
+                            <i class="fa-solid fa-ticket text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-xl text-white brand-font">Tickets</h3>
+                            <p class="text-xs text-cabify-subtext">Soporte Asíncrono / Casos</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-cabify-subtext mb-1">Volumen Mensual de Tickets</label>
+                            <input type="number" id="ticketVolume" value="12000" min="0" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-bold text-cabify-subtext">AHT Ticket (Minutos)</label>
+                                <span id="ticketAhtSec" class="text-[11px] text-purple-300 font-mono font-bold">8.0 min</span>
+                            </div>
+                            <input type="number" id="ticketAht" value="8" min="0.1" step="0.5" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+
+                        <!-- EDITABLE SLA CONTROL -->
+                        <div class="p-3 bg-cabify-darkCard border border-purple-500/40 rounded-xl space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label class="text-xs font-bold text-purple-300 flex items-center">
+                                    <i class="fa-solid fa-hourglass-half mr-1.5"></i> Meta SLA de Respuesta
+                                </label>
+                                <span class="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded font-mono font-bold">SLA Target</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-cabify-subtext mb-1">% Cumplimiento</label>
+                                    <input type="number" id="ticketSlaTarget" value="80" min="1" max="100" oninput="calculateAll()" class="input-purple w-full px-2.5 py-1.5 rounded-lg text-xs font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-cabify-subtext mb-1">Ventana (Horas)</label>
+                                    <input type="number" id="ticketSlaHours" value="1.0" min="0.1" step="0.5" oninput="calculateAll()" class="input-purple w-full px-2.5 py-1.5 rounded-lg text-xs font-bold">
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-cabify-subtext">Meta: Atender el <strong><span id="labelSlaPct">80</span>%</strong> en menos de <strong><span id="labelSlaHours">1</span> hora(s)</strong>.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-cabify-subtext mb-1">Shrinkage / Merma (%)</label>
+                            <input type="number" id="ticketShrinkage" value="18" min="0" max="80" oninput="calculateAll()" class="input-purple w-full px-3 py-2 rounded-xl text-sm font-bold">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket Result -->
+                <div class="mt-6 pt-4 border-t border-cabify-border bg-cabify-darkCard/90 -mx-6 -mb-6 p-6 rounded-b-2xl">
+                    <div class="flex justify-between items-baseline mb-1">
+                        <span class="text-xs font-bold text-cabify-subtext">FTEs Requeridos Tickets:</span>
+                        <span id="ticketFteResult" class="text-3xl font-black text-purple-300 brand-font">0.0</span>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-cabify-subtext font-medium">
+                        <span>Horas Netas Trabajo: <strong id="ticketNetHours" class="text-white">0 hrs</strong></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 4. SUMMARY DASHBOARD & ANALYTICS -->
+        <section class="purple-card rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 border border-cabify-neon/40 bg-gradient-to-br from-cabify-darkCard via-cabify-card to-cabify-darkCard">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between border-b border-cabify-border pb-6 gap-6">
+                <div>
+                    <span class="text-xs font-extrabold text-cabify-bright bg-cabify-neon/20 px-3 py-1 rounded-full uppercase tracking-widest border border-cabify-neon/40 mb-2 inline-block">Resumen Operativo</span>
+                    <h2 class="text-2xl sm:text-3xl font-black text-white brand-font">Total Headcount Requerido (FTEs)</h2>
+                    <p class="text-xs text-cabify-subtext mt-1">Capacidad total estimada para cumplir SLAs en el servicio seleccionado.</p>
+                </div>
+
+                <div class="bg-cabify-darkCard/90 border border-cabify-neon/50 px-8 py-5 rounded-2xl flex items-center space-x-8 shadow-inner">
+                    <div>
+                        <span class="text-xs text-cabify-subtext block uppercase font-bold tracking-wider">FTE TOTAL BRUTO:</span>
+                        <span id="totalFteResult" class="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cabify-bright via-cabify-neon to-cabify-pink brand-font">0.0</span>
+                    </div>
+                    <div class="h-12 w-px bg-cabify-border"></div>
+                    <div>
+                        <span class="text-xs text-cabify-subtext block uppercase font-bold tracking-wider">Horas Brutas / Mes:</span>
+                        <span id="totalGrossHours" class="text-lg font-black text-white">0 hrs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Visual Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+                <!-- Donut Chart -->
+                <div class="lg:col-span-5 bg-cabify-darkCard/80 p-6 rounded-2xl border border-cabify-border flex flex-col items-center justify-center">
+                    <h4 class="text-xs font-bold text-white mb-4 w-full text-left uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-chart-pie text-cabify-neon mr-2"></i> Distribución de FTEs por Canal
+                    </h4>
+                    <div class="relative w-full max-w-[260px] h-[220px]">
+                        <canvas id="fteChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Breakdown Rows -->
+                <div class="lg:col-span-7 space-y-4">
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">Desglose Detallado</h4>
+
+                    <!-- Calls Row -->
+                    <div class="flex items-center justify-between p-4 bg-cabify-darkCard/80 rounded-xl border border-cabify-border">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-3.5 h-3.5 rounded-full bg-cabify-neon inline-block shadow-sm"></span>
+                            <div>
+                                <span class="text-sm font-bold text-white block">Calls</span>
+                                <span class="text-xs text-cabify-subtext">Llamadas en directo</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-5">
+                            <span id="callsPctBreakdown" class="text-xs font-bold text-cabify-subtext">0%</span>
+                            <span id="callsFteBadge" class="text-xs font-black text-white bg-cabify-neon/30 px-3 py-1.5 rounded-lg border border-cabify-neon/60">0.0 FTE</span>
+                        </div>
+                    </div>
+
+                    <!-- Chat Row -->
+                    <div class="flex items-center justify-between p-4 bg-cabify-darkCard/80 rounded-xl border border-cabify-border">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-3.5 h-3.5 rounded-full bg-cabify-pink inline-block shadow-sm"></span>
+                            <div>
+                                <span class="text-sm font-bold text-white block">Chat</span>
+                                <span class="text-xs text-cabify-subtext">Concurrencia: <strong id="chatConcurrencyBadge" class="text-white">2.5</strong></span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-5">
+                            <span id="chatPctBreakdown" class="text-xs font-bold text-cabify-subtext">0%</span>
+                            <span id="chatFteBadge" class="text-xs font-black text-white bg-cabify-pink/30 px-3 py-1.5 rounded-lg border border-cabify-pink/60">0.0 FTE</span>
+                        </div>
+                    </div>
+
+                    <!-- Tickets Row -->
+                    <div class="flex items-center justify-between p-4 bg-cabify-darkCard/80 rounded-xl border border-cabify-border">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-3.5 h-3.5 rounded-full bg-purple-400 inline-block shadow-sm"></span>
+                            <div>
+                                <span class="text-sm font-bold text-white block">Tickets</span>
+                                <span class="text-xs text-cabify-subtext">SLA: <strong id="ticketSlaBadge" class="text-white">80% / 1h</strong></span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-5">
+                            <span id="ticketPctBreakdown" class="text-xs font-bold text-cabify-subtext">0%</span>
+                            <span id="ticketFteBadge" class="text-xs font-black text-white bg-purple-500/30 px-3 py-1.5 rounded-lg border border-purple-400/60">0.0 FTE</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- 1. TAXONOMY DATA STRUCTURE FROM IMAGE ---
+        const taxonomyData = [
+            // Core -> B2B
+            { services: "Core", audience: "B2B", group: "Attention", market: "Attention" },
+            { services: "Core", audience: "B2B", group: "Attention", market: "AR-UY-PE" },
+            { services: "Core", audience: "B2B", group: "Attention", market: "ES" },
+            { services: "Core", audience: "B2B", group: "Attention", market: "MX-CL-CO" },
+            { services: "Core", audience: "B2B", group: "Attention", market: "Col/ES" },
+            { services: "Core", audience: "B2B", group: "Traffic", market: "B2B Trafico" },
+            
+            // Core -> Cross
+            { services: "Core", audience: "Cross", group: "Lost Items", market: "Lost Items" },
+            { services: "Core", audience: "Cross", group: "RRSS", market: "RRSS" },
+            { services: "Core", audience: "Cross", group: "Attention", market: "Emergencies" },
+            { services: "Core", audience: "Cross", group: "Attention", market: "Llamadas" },
+
+            // Core -> Driver
+            { services: "Core", audience: "Driver", group: "Acquisition", market: "Acquisition" },
+            { services: "Core", audience: "Driver", group: "Acquisition", market: "AR" },
+            { services: "Core", audience: "Driver", group: "Acquisition", market: "CL" },
+            { services: "Core", audience: "Driver", group: "Acquisition", market: "CO" },
+            { services: "Core", audience: "Driver", group: "Acquisition", market: "PE" },
+            { services: "Core", audience: "Driver", group: "Acquisition", market: "UY" },
+            { services: "Core", audience: "Driver", group: "Attention", market: "Attention" },
+            { services: "Core", audience: "Driver", group: "Attention", market: "AR" },
+            { services: "Core", audience: "Driver", group: "Attention", market: "CL" },
+            { services: "Core", audience: "Driver", group: "Attention", market: "CO" },
+            { services: "Core", audience: "Driver", group: "Attention", market: "ES" },
+            { services: "Core", audience: "Driver", group: "Attention", market: "PE" },
+            { services: "Core", audience: "Driver", group: "Attention", market: "UY" },
+
+            // Core -> Fleets
+            { services: "Core", audience: "Fleets", group: "Attention", market: "Fleets" },
+            { services: "Core", audience: "Fleets", group: "Acquisition", market: "Fleets ADQ" },
+
+            // Core -> Private
+            { services: "Core", audience: "Private", group: "Attention", market: "Attention" },
+            { services: "Core", audience: "Private", group: "Attention", market: "AR" },
+            { services: "Core", audience: "Private", group: "Attention", market: "CL" },
+            { services: "Core", audience: "Private", group: "Attention", market: "CO" },
+            { services: "Core", audience: "Private", group: "Attention", market: "ES" },
+            { services: "Core", audience: "Private", group: "Attention", market: "PE" },
+            { services: "Core", audience: "Private", group: "Attention", market: "UY" },
+
+            // Logistics
+            { services: "Logistics", audience: "Logistics", group: "Attention", market: "Attention" },
+            { services: "Logistics", audience: "Logistics", group: "Acquisition", market: "Acquisition" },
+            { services: "Logistics", audience: "Logistics", group: "BPO", market: "Alertas" },
+
+            // Special Services
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "BPO Libro PE" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "BPO CO" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "BPO AR" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "BPO CL" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "BO Fraude" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "BPO ES" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "Governance CL" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "Governance Documental" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "Vecttor ATC" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "Vecttor ONB" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "Vecttor RRSS" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "Vecttor Alertas" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "BPO Movo" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "CSC" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "BPO Calls CO" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "SDR" },
+            { services: "Special Services", audience: "Special Services", group: "BPO", market: "B2B Longtail" },
+            { services: "Special Services", audience: "Sales", group: "BPO", market: "Sales-FODZI" },
+            { services: "Special Services", audience: "Sales", group: "BPO", market: "Campañas" },
+            { services: "Special Services", audience: "Sales", group: "BPO", market: "SMB" }
+        ];
+
+        let fteChartInstance = null;
+
+        // --- 2. CASCADING DROPDOWN LOGIC ---
+        function initTaxonomySelectors() {
+            const servicesList = [...new Set(taxonomyData.map(item => item.services))];
+            populateSelect("selServices", servicesList);
+            onServicesChange();
+        }
+
+        function onServicesChange() {
+            const selectedService = document.getElementById("selServices").value;
+            const filteredAudience = [...new Set(
+                taxonomyData.filter(item => item.services === selectedService).map(item => item.audience)
+            )];
+            populateSelect("selAudience", filteredAudience);
+            onAudienceChange();
+        }
+
+        function onAudienceChange() {
+            const selectedService = document.getElementById("selServices").value;
+            const selectedAudience = document.getElementById("selAudience").value;
+            const filteredGroup = [...new Set(
+                taxonomyData.filter(item => item.services === selectedService && item.audience === selectedAudience)
+                .map(item => item.group)
+            )];
+            populateSelect("selGroup", filteredGroup);
+            onGroupChange();
+        }
+
+        function onGroupChange() {
+            const selectedService = document.getElementById("selServices").value;
+            const selectedAudience = document.getElementById("selAudience").value;
+            const selectedGroup = document.getElementById("selGroup").value;
+            const filteredMarket = [...new Set(
+                taxonomyData.filter(item => 
+                    item.services === selectedService && 
+                    item.audience === selectedAudience && 
+                    item.group === selectedGroup
+                ).map(item => item.market)
+            )];
+            populateSelect("selMarket", filteredMarket);
+            updateSelectedTaxonomyLabel();
+        }
+
+        function populateSelect(elementId, items) {
+            const select = document.getElementById(elementId);
+            select.innerHTML = "";
+            items.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item;
+                opt.textContent = item;
+                select.appendChild(opt);
+            });
+        }
+
+        function updateSelectedTaxonomyLabel() {
+            const s1 = document.getElementById("selServices").value;
+            const s2 = document.getElementById("selAudience").value;
+            const s3 = document.getElementById("selGroup").value;
+            const s4 = document.getElementById("selMarket").value;
+            
+            const fullTag = `${s1} | ${s2} | ${s3} | ${s4}`;
+            document.getElementById("activeServiceTag").innerText = fullTag;
+            document.getElementById("printServiceTaxonomy").innerText = `Servicio: ${fullTag}`;
+        }
+
+        // --- 3. CHART INITIALIZATION ---
+        function initChart() {
+            const ctx = document.getElementById('fteChart').getContext('2d');
+            fteChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Calls', 'Chat', 'Tickets'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#913BFF', '#EC4899', '#C084FC'],
+                        borderColor: '#1F0A3B',
+                        borderWidth: 3,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw} FTEs`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // --- 4. MAIN FTE CALCULATION ENGINE ---
+        function calculateAll() {
+            // Global Hours
+            const hoursPerDay = parseFloat(document.getElementById('hoursPerDay').value) || 8;
+            const workingDaysMonth = parseFloat(document.getElementById('workingDaysMonth').value) || 21.67;
+            const monthlyStandardHours = workingDaysMonth * hoursPerDay;
+            document.getElementById('monthlyStandardHours').value = monthlyStandardHours.toFixed(1);
+
+            // 1. CALLS
+            const callsVolume = parseFloat(document.getElementById('callsVolume').value) || 0;
+            const callsAhtSec = parseFloat(document.getElementById('callsAht').value) || 0;
+            const callsOccupancyPct = (parseFloat(document.getElementById('callsOccupancy').value) || 85) / 100;
+            const callsShrinkagePct = (parseFloat(document.getElementById('callsShrinkage').value) || 0) / 100;
+
+            document.getElementById('callsAhtMin').innerText = (callsAhtSec / 60).toFixed(1) + ' min';
+
+            const callsNetHours = (callsVolume * callsAhtSec) / 3600;
+            const callsEffectiveHours = callsNetHours / (callsOccupancyPct > 0 ? callsOccupancyPct : 1);
+            const callsGrossHours = callsEffectiveHours / (1 - callsShrinkagePct > 0 ? (1 - callsShrinkagePct) : 1);
+            const callsFTE = callsGrossHours / monthlyStandardHours;
+
+            document.getElementById('callsFteResult').innerText = callsFTE.toFixed(1);
+            document.getElementById('callsNetHours').innerText = Math.round(callsNetHours).toLocaleString() + ' hrs';
+            document.getElementById('callsGrossHours').innerText = Math.round(callsGrossHours).toLocaleString() + ' hrs';
+
+            // 2. CHAT (CONCURRENCY EDITABLE)
+            const chatVolume = parseFloat(document.getElementById('chatVolume').value) || 0;
+            const chatAhtSec = parseFloat(document.getElementById('chatAht').value) || 0;
+            const chatConcurrency = parseFloat(document.getElementById('chatConcurrency').value) || 1;
+            const chatShrinkagePct = (parseFloat(document.getElementById('chatShrinkage').value) || 0) / 100;
+
+            document.getElementById('chatAhtMin').innerText = (chatAhtSec / 60).toFixed(1) + ' min';
+
+            const chatRawHours = (chatVolume * chatAhtSec) / 3600;
+            const chatEffectiveHours = chatRawHours / (chatConcurrency > 0 ? chatConcurrency : 1);
+            const chatGrossHours = chatEffectiveHours / (1 - chatShrinkagePct > 0 ? (1 - chatShrinkagePct) : 1);
+            const chatFTE = chatGrossHours / monthlyStandardHours;
+
+            document.getElementById('chatFteResult').innerText = chatFTE.toFixed(1);
+            document.getElementById('chatEffectiveHours').innerText = Math.round(chatEffectiveHours).toLocaleString() + ' hrs';
+            document.getElementById('chatConcurrencyBadge').innerText = chatConcurrency.toFixed(1);
+
+            // 3. TICKETS (SLA EDITABLE)
+            const ticketVolume = parseFloat(document.getElementById('ticketVolume').value) || 0;
+            const ticketAhtMin = parseFloat(document.getElementById('ticketAht').value) || 0;
+            const ticketSlaTarget = parseFloat(document.getElementById('ticketSlaTarget').value) || 80;
+            const ticketSlaHours = parseFloat(document.getElementById('ticketSlaHours').value) || 1;
+            const ticketShrinkagePct = (parseFloat(document.getElementById('ticketShrinkage').value) || 0) / 100;
+
+            document.getElementById('ticketAhtSec').innerText = ticketAhtMin.toFixed(1) + ' min';
+            document.getElementById('labelSlaPct').innerText = ticketSlaTarget;
+            document.getElementById('labelSlaHours').innerText = ticketSlaHours;
+            document.getElementById('ticketSlaBadge').innerText = `${ticketSlaTarget}% / ${ticketSlaHours}h`;
+
+            const ticketNetHours = (ticketVolume * ticketAhtMin) / 60;
+            const slaFactor = 1 + ((ticketSlaTarget / 100) * (1 / Math.max(ticketSlaHours, 0.5)) * 0.05);
+            const ticketAdjustedHours = ticketNetHours * slaFactor;
+            const ticketGrossHours = ticketAdjustedHours / (1 - ticketShrinkagePct > 0 ? (1 - ticketShrinkagePct) : 1);
+            const ticketFTE = ticketGrossHours / monthlyStandardHours;
+
+            document.getElementById('ticketFteResult').innerText = ticketFTE.toFixed(1);
+            document.getElementById('ticketNetHours').innerText = Math.round(ticketNetHours).toLocaleString() + ' hrs';
+
+            // 4. TOTALS
+            const totalFTE = callsFTE + chatFTE + ticketFTE;
+            const totalGrossHours = callsGrossHours + chatGrossHours + ticketGrossHours;
+
+            document.getElementById('totalFteResult').innerText = totalFTE.toFixed(1);
+            document.getElementById('totalGrossHours').innerText = Math.round(totalGrossHours).toLocaleString() + ' hrs/mes';
+
+            const callsPct = totalFTE > 0 ? ((callsFTE / totalFTE) * 100).toFixed(0) : 0;
+            const chatPct = totalFTE > 0 ? ((chatFTE / totalFTE) * 100).toFixed(0) : 0;
+            const ticketPct = totalFTE > 0 ? ((ticketFTE / totalFTE) * 100).toFixed(0) : 0;
+
+            document.getElementById('callsPctBreakdown').innerText = callsPct + '%';
+            document.getElementById('chatPctBreakdown').innerText = chatPct + '%';
+            document.getElementById('ticketPctBreakdown').innerText = ticketPct + '%';
+
+            document.getElementById('callsFteBadge').innerText = callsFTE.toFixed(1) + ' FTE';
+            document.getElementById('chatFteBadge').innerText = chatFTE.toFixed(1) + ' FTE';
+            document.getElementById('ticketFteBadge').innerText = ticketFTE.toFixed(1) + ' FTE';
+
+            // Update Chart
+            if (fteChartInstance) {
+                fteChartInstance.data.datasets[0].data = [
+                    parseFloat(callsFTE.toFixed(1)),
+                    parseFloat(chatFTE.toFixed(1)),
+                    parseFloat(ticketFTE.toFixed(1))
+                ];
+                fteChartInstance.update();
+            }
+        }
+
+        // --- 5. EXPORT CSV FUNCTION ---
+        function exportCSV() {
+            const activeService = document.getElementById('activeServiceTag').innerText;
+            const date = new Date().toISOString().split('T')[0];
+            const data = [
+                ["Cabify Operations - FTE Report"],
+                ["Servicio Seleccionado", activeService],
+                ["Fecha de Generación", date],
+                [],
+                ["Canal", "Volumen Mensual", "AHT", "Parametro Especial", "Shrinkage (%)", "FTE Requerido"],
+                ["Calls", document.getElementById('callsVolume').value, document.getElementById('callsAht').value + "s", "Ocupación: " + document.getElementById('callsOccupancy').value + "%", document.getElementById('callsShrinkage').value + "%", document.getElementById('callsFteResult').innerText],
+                ["Chat", document.getElementById('chatVolume').value, document.getElementById('chatAht').value + "s", "Concurrencia: " + document.getElementById('chatConcurrency').value, document.getElementById('chatShrinkage').value + "%", document.getElementById('chatFteResult').innerText],
+                ["Tickets", document.getElementById('ticketVolume').value, document.getElementById('ticketAht').value + "m", "SLA Target: " + document.getElementById('ticketSlaTarget').value + "% en " + document.getElementById('ticketSlaHours').value + "h", document.getElementById('ticketShrinkage').value + "%", document.getElementById('ticketFteResult').innerText],
+                [],
+                ["TOTAL FTE REQUERIDO", "", "", "", "", document.getElementById('totalFteResult').innerText],
+                ["HORAS BRUTAS MES", "", "", "", "", document.getElementById('totalGrossHours').innerText]
+            ];
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            data.forEach(row => { csvContent += row.join(",") + "\n"; });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Cabify_FTE_${date}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function resetDefaults() {
+            document.getElementById('hoursPerDay').value = 8;
+            document.getElementById('daysPerWeek').value = 5;
+            document.getElementById('workingDaysMonth').value = 21.67;
+
+            document.getElementById('callsVolume').value = 18000;
+            document.getElementById('callsAht').value = 240;
+            document.getElementById('callsOccupancy').value = 85;
+            document.getElementById('callsShrinkage').value = 22;
+
+            document.getElementById('chatVolume').value = 32000;
+            document.getElementById('chatAht').value = 330;
+            document.getElementById('chatConcurrency').value = 2.5;
+            document.getElementById('chatShrinkage').value = 22;
+
+            document.getElementById('ticketVolume').value = 12000;
+            document.getElementById('ticketAht').value = 8;
+            document.getElementById('ticketSlaTarget').value = 80;
+            document.getElementById('ticketSlaHours').value = 1.0;
+            document.getElementById('ticketShrinkage').value = 18;
+
+            initTaxonomySelectors();
+            calculateAll();
+        }
+
+        window.onload = function() {
+            document.getElementById('printDate').innerText = "Fecha: " + new Date().toLocaleDateString();
+            initChart();
+            initTaxonomySelectors();
+            calculateAll();
+        };
+    </script>
+</body>
+</html>
